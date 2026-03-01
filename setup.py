@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script for Agent Task Manager
+Setup script for Agent Nexus
 """
 
 import os

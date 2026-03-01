@@ -1,5 +1,5 @@
 # Product Requirements Document (PRD)
-## Custom Kanban System for AI Agent Orchestration
+## Agent Nexus: Central Hub for AI Agent Orchestration
 **Version**: 1.0  
 **Date**: 2026-03-01  
 **Status**: Active Development  
