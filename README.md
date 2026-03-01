@@ -1,6 +1,8 @@
-# Agent Task Manager 🎯
+# Agent Nexus 🎯
 
-A custom, self-contained Kanban system for AI agent orchestration with real-time updates, crash recovery, and multi-project support.
+A central hub for AI agent orchestration with Kanban task management, real-time coordination, and automated workflow execution.
+
+**Agent Nexus** coordinates your AI agent team (Ren, Aki, Kuro, Shin, Sora) to work together on tasks with automatic assignment, heartbeat monitoring, and crash recovery.
 
 ## 📋 Table of Contents
 - [✨ Features](#-features)
