@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+
+        .column {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .column-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .task-count {
+            background: #e8f4fc;
+            color: #3498db;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .task-list {
+            min-height: 100px;
+        }
+
+        .task-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: move;
+            transition: all 0.3s;
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-card.dragging {
+            opacity: 0.5;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .task-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .task-priority {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .priority-high { background: #ffebee; color: #c62828; }
+        .priority-medium { background: #fff3e0; color: #ef6c00; }
+        .priority-low { background: #e8f5e9; color: #2e7d32; }
+
+        .task-assignee {
+            font-weight: 500;
+            color: #3498db;
+        }
+
+        .new-task-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #555;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .agents-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .agent-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .agent-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .status-idle { background: #e8f4fc; color: #3498db; }
+        .status-working { background: #e8f5e9; color: #2e7d32; }
+        .status-offline { background: #ffebee; color: #c62828; }
+
+        .agent-task {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .projects-tabs {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Agent Task Manager</h1>
+                <p style="color: #666; margin-top: 5px;">Custom Kanban for AI Agent Orchestration</p>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="connectionStatus"></span>
+                <span id="connectionText">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="projects-tabs" id="projectsTabs">
+            <!-- Projects will be loaded here -->
+        </div>
+
+        <div class="new-task-form">
+            <h2 style="margin-bottom: 20px;">Create New Task</h2>
+            <form id="createTaskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Title *</label>
+                    <input type="text" id="taskTitle" name="title" required placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" name="description" placeholder="Detailed description of the task..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskProject">Project</label>
+                    <select id="taskProject" name="project_id">
+                        <!-- Projects will be populated -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskPriority">Priority</label>
+                    <select id="taskPriority" name="priority">
+                        <option value="0">Low</option>
+                        <option value="1" selected>Medium</option>
+                        <option value="2">High</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Clear</button>
+                    <button type="submit" class="btn-primary">Create Task</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="kanban-board" id="kanbanBoard">
+            <!-- Columns will be loaded here -->
+        </div>
+
+        <div class="agents-panel">
+            <h2 style="margin-bottom: 15px;">Agent Status</h2>
+            <div class="agents-grid" id="agentsGrid">
+                <!-- Agents will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentProject = 'default';
+        let eventSource = null;
+        let tasks = [];
+        let projects = [];
+        let agents = [];
+
+        // Status columns in order
+        const statusColumns = [
+            { id: 'backlog', title: 'Backlog', color: '#95a5a6' },
+            { id: 'todo', title: 'Todo', color: '#3498db' },
+            { id: 'planning', title: 'Planning', color: '#9b59b6' },
+            { id: 'hitl_review', title: 'HITL Review', color: '#f39c12' },
+            { id: 'wip', title: 'Work in Progress', color: '#2ecc71' },
+            { id: 'implemented', title: 'Implemented', color: '#27ae60' },
+            { id: 'done', title: 'Done', color: '#7f8c8d' },
+            { id: 'blocked', title: 'Blocked', color: '#e74c3c' },
+            { id: 'cancelled', title: 'Cancelled', color: '#34495e' }
+        ];
+
+        // API base URL
+        const API_BASE = 'http://localhost:8000';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+            loadTasks();
+            setupEventSource();
+            setupDragAndDrop();
+            
+            // Form submission
+            document.getElementById('createTaskForm').addEventListener('submit', createTask);
+        });
+
+        // Setup Server-Sent Events
+        function setupEventSource() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource(`${API_BASE}/api/events`);
+            
+            eventSource.onopen = () => {
+                updateConnectionStatus(true);
+            };
+
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.event === 'state_change') {
+                    loadTasks();
+                    console.log('State changed, reloading tasks...');
+                }
+            };
+
+            eventSource.onerror = () => {
+                updateConnectionStatus(false);
+                // Try to reconnect after 5 seconds
+                setTimeout(setupEventSource, 5000);
+            };
+        }
+
+        function updateConnectionStatus(connected) {
+            const dot = document.getElementById('connectionStatus');
+            const text = document.getElementById('connectionText');
+            
+            if (connected) {
+                dot.classList.remove('disconnected');
+                dot.classList.add('connected');
+                text.textContent = 'Connected';
+            } else {
+                dot.classList.remove('connected');
+                dot.classList.add('disconnected');
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        // Load projects
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_BASE}/api/projects`);
+                projects = await response.json();
+                renderProjectsTabs();
+                populateProjectSelect();
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        function renderProjectsTabs() {
+            const container = document.getElementById('projectsTabs');
+            container.innerHTML = '';
+            
+            projects.forEach(project => {
+                const tab = document.createElement('div');
+                tab.className = `project-tab ${project.id === currentProject ? 'active' : ''}`;
+                tab.textContent = `${project.name} (${tasks.filter(t => t.project_id === project.id).length})`;
+                tab.onclick = () => switchProject(project.id);
+                container.appendChild(tab);
+            });
+        }
+
+        function populateProjectSelect() {
+            const select = document.getElementById('taskProject');
+            select.innerHTML = '';
+            
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                if (project.id === currentProject) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function switchProject(projectId) {
+            currentProject = projectId;
+            renderProjectsTabs();
+            loadTasks();
+        }
+
+        // Load tasks
+        async function loadTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/api/tasks?project_id=${currentProject}`);
+                tasks = await response.json();
+                renderKanbanBoard();
+                renderProjectsTabs(); // Update task counts
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+
+        function renderKanbanBoard() {
+            const board = document.getElementById('kanbanBoard');
+            board.innerHTML = '';
+            
+            statusColumns.forEach(status => {
+                const columnTasks = tasks.filter(task => task.status === status.id);
+                
+                const column = document.createElement('div');
+                column.className = 'column';
+                column.dataset.status = status.id;
+                
+                column.innerHTML = `
+                    <div class="column-header">
+                        <div class="column-title">${status.title}</div>
+                        <div class="task-count">${columnTasks.length}</div>
+                    </div>
+                    <div class="task-list" id="task-list-${status.id}">
+                        ${columnTasks.length > 0 ? 
+                            columnTasks.map(task => createTaskCard(task)).join('') :
+                            '<div class="empty-state">No tasks</div>'
+                        }
+                    </div>
+                `;
+                
+                board.appendChild(column);
+            });
+            
+            // Re-attach drag events
+            attachDragEvents();
+        }
+
+        function createTaskCard(task) {
+            const priorityClass = task.priority >= 2 ? 'priority-high' : 
+                                task.priority === 1 ? 'priority-medium' : 'priority-low';
+            const priorityText = task.priority >= 2 ? 'High' : 
+                               task.priority === 1 ? 'Medium' : 'Low';
+            
+            return `
+                <div class="task-card" draggable="true" data-task-id="${task.id}">
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                    <div class="task-meta">
+                        <div>
+                            <span class="task-priority ${priorityClass}">${priorityText}</span>
+                        </div>
+                        ${task.assignee ? `<div class="task-assignee">${escapeHtml(task.assignee)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Create task
+        async function createTask(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            const taskData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                project_id: formData.get('project_id') || currentProject,
+                priority: parseInt(formData.get('priority'))
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/t

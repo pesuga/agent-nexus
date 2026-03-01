@@ -1,0 +1,93 @@
+#!/bin/bash
+# Shin Agent Wrapper
+# Strategy & planning specialist
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+CLI="$PROJECT_ROOT/cli/agent-cli.py"
+
+# Default mode: daemon (continuous polling)
+MODE="${1:-daemon}"
+INTERVAL=30  # Poll every 30 seconds
+
+echo "Shin Agent starting ($MODE mode)..."
+
+# Ensure CLI exists
+if [ ! -f "$CLI" ]; then
+    echo "Error: CLI not found at $CLI"
+    exit 1
+fi
+
+# Function to send heartbeat
+send_heartbeat() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Sending heartbeat..."
+    python3 "$CLI" heartbeat --agent shin
+}
+
+# Function to poll for tasks
+poll_for_tasks() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Polling for tasks..."
+    
+    # Check for assigned tasks
+    TASK_JSON=$(python3 "$CLI" poll --agent shin)
+    
+    if [ -n "$TASK_JSON" ] && [ "$TASK_JSON" != "null" ]; then
+        # Extract task ID from JSON (simple approach)
+        TASK_ID=$(echo "$TASK_JSON" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+        
+        if [ -n "$TASK_ID" ]; then
+            echo "Found task: $TASK_ID"
+            echo "Executing task..."
+            
+            # Execute the task
+            python3 "$CLI" execute --task "$TASK_ID" --agent shin
+            
+            # Send heartbeat after execution
+            send_heartbeat
+        fi
+    fi
+}
+
+# Main execution
+case "$MODE" in
+    daemon)
+        echo "Running in daemon mode (poll every ${INTERVAL}s)"
+        while true; do
+            poll_for_tasks
+            send_heartbeat
+            sleep $INTERVAL
+        done
+        ;;
+    
+    poll)
+        poll_for_tasks
+        ;;
+        
+    heartbeat)
+        send_heartbeat
+        ;;
+        
+    execute)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 execute <task_id>"
+            exit 1
+        fi
+        python3 "$CLI" execute --task "$2" --agent shin
+        ;;
+        
+    health)
+        python3 "$CLI" health
+        ;;
+        
+    *)
+        echo "Usage: $0 {daemon|poll|heartbeat|execute|health}"
+        echo ""
+        echo "Commands:"
+        echo "  daemon     Run continuously (default)"
+        echo "  poll       Poll for tasks once"
+        echo "  heartbeat  Send heartbeat once"
+        echo "  execute    Execute specific task"
+        echo "  health     Check system health"
+        exit 1
+        ;;
+esac
