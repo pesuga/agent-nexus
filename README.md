@@ -1,8 +1,22 @@
 # Agent Nexus 🎯
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/pesuga/agent-nexus)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-green)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-009688)](https://fastapi.tiangolo.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+
 A central hub for AI agent orchestration with Kanban task management, real-time coordination, and automated workflow execution.
 
 **Agent Nexus** coordinates your AI agent team (Ren, Aki, Kuro, Shin, Sora) to work together on tasks with automatic assignment, heartbeat monitoring, and crash recovery.
+
+## ✨ **Key Features**
+
+- 🎯 **Agent Team Coordination**: Ren, Aki, Kuro, Shin, Sora working in harmony
+- 📋 **Kanban Task Management**: Drag-and-drop interface with real-time updates
+- ❤️ **Heartbeat Monitoring**: Local model integration for cost-effective health checks
+- 🛡️ **Crash Recovery**: Automatic detection and task reassignment
+- 🔄 **Concurrency Control**: File locking for safe multi-agent operation
+- 🚀 **OpenClaw Integration**: Seamless execution via OpenClaw agents
 
 ## 📋 Table of Contents
 - [✨ Features](#-features)
