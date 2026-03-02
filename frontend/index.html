@@ -3,501 +3,791 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Task Manager</title>
-    <link rel="stylesheet" href="style.css">
-
-        .column {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    <title>Agent Nexus - Workflow Dashboard</title>
+    <link rel="stylesheet" href="style-premium.css?v=20260302f">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--bg-input);
+            grid-column: 1 / -1;
+        }
+        
+        .tab-btn {
+            padding: var(--space-lg) var(--space-xl);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-row-alt);
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-red);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-red);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+        
+        .tab-content {
+            display: none;
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
 
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 1.85fr 1fr;
+            gap: var(--space-lg);
+            align-items: start;
+        }
+
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .timer-card {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .task-list-card {
+                grid-column: 1 / -1;
+            }
+            .kanban-board {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Kanban Board with 9 workflow states */
+        .kanban-board {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: var(--space-sm);
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+            min-height: 620px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-row-alt) var(--bg-primary);
+        }
+        
+        .kanban-column {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            min-height: 600px;
+            min-width: 250px;
+            max-width: 250px;
+            flex: 0 0 250px;
+            display: flex;
+            flex-direction: column;
+            border-top: 4px solid var(--status-backlog);
+        }
+        
+        .kanban-column.backlog { border-top-color: var(--status-backlog); }
+        .kanban-column.todo { border-top-color: var(--status-todo); }
+        .kanban-column.planning { border-top-color: var(--status-planning); }
+        .kanban-column.hitl_review { border-top-color: var(--status-hitl-review); }
+        .kanban-column.working { border-top-color: var(--status-working); }
+        .kanban-column.ready_to_implement { border-top-color: var(--status-ready); }
+        .kanban-column.approval { border-top-color: var(--status-approval); }
+        .kanban-column.completed { border-top-color: var(--status-completed); }
+        .kanban-column.blocked { border-top-color: var(--status-blocked); }
+        
         .column-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
+            justify-content: space-between;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--bg-input);
         }
-
+        
         .column-title {
-            font-size: 18px;
+            font-size: 12px;
             font-weight: 600;
-            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-
-        .task-count {
-            background: #e8f4fc;
-            color: #3498db;
-            padding: 4px 12px;
-            border-radius: 20px;
+        
+        .column-count {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-circle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .tasks-column {
+            flex: 1;
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            overflow-y: auto;
+            min-height: 500px;
+        }
+        
+        .kanban-task {
+            background: var(--bg-row-alt);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            cursor: move;
+            transition: all var(--transition-fast);
+            border-left: 4px solid var(--status-todo);
+        }
+        
+        .kanban-task:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-subtle);
+        }
+        
+        .kanban-task.backlog { border-left-color: var(--status-backlog); }
+        .kanban-task.todo { border-left-color: var(--status-todo); }
+        .kanban-task.planning { border-left-color: var(--status-planning); }
+        .kanban-task.hitl_review { border-left-color: var(--status-hitl-review); }
+        .kanban-task.working { border-left-color: var(--status-working); }
+        .kanban-task.ready_to_implement { border-left-color: var(--status-ready); }
+        .kanban-task.approval { border-left-color: var(--status-approval); }
+        .kanban-task.completed { border-left-color: var(--status-completed); }
+        .kanban-task.blocked { border-left-color: var(--status-blocked); }
+        
+        .task-priority {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: var(--radius-pill);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .priority-high { border: 1px solid var(--badge-red); color: var(--badge-red); }
+        .priority-medium { border: 1px solid var(--badge-orange); color: var(--badge-orange); }
+        .priority-low { border: 1px solid var(--accent-green); color: var(--accent-green); }
+        
+        .task-title {
             font-size: 14px;
             font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
         }
-
-        .task-list {
-            min-height: 100px;
+        
+        .task-assignee {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-
-        .task-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: move;
-            transition: all 0.3s;
+        
+        /* Agents Tab */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
-
-        .task-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        
+        .agent-card-large {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border-left: 4px solid var(--accent-green);
+            transition: all var(--transition-fast);
+        }
+        
+        .agent-card-large:hover {
             transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
         }
-
-        .task-card.dragging {
+        
+        .agent-card-large.working {
+            border-left-color: var(--accent-blue);
+        }
+        
+        .agent-card-large.offline {
+            border-left-color: var(--text-muted);
+            opacity: 0.7;
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .agent-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-circle);
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .agent-info {
+            flex: 1;
+        }
+        
+        .agent-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .agent-role {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .agent-status {
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-online {
+            background: rgba(76, 217, 100, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+        
+        .status-working {
+            background: rgba(76, 139, 245, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+        }
+        
+        .status-offline {
+            background: rgba(110, 110, 130, 0.1);
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+        }
+        
+        .agent-details {
+            margin-top: var(--space-lg);
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--bg-input);
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .detail-value {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .agent-tasks {
+            margin-top: var(--space-lg);
+        }
+        
+        .tasks-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+        }
+        
+        .agent-task-item {
+            background: var(--bg-row-alt);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            border-left: 3px solid var(--status-todo);
+        }
+        
+        .agent-task-title {
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .agent-task-status {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Empty state for columns */
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state i {
+            font-size: 24px;
+            margin-bottom: 8px;
             opacity: 0.5;
         }
-
-        .task-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #2c3e50;
-        }
-
-        .task-description {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .task-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        
+        .empty-state div {
             font-size: 12px;
-            color: #888;
+        }
+        
+        /* Drag and drop styles */
+        .drag-over {
+            background: rgba(76, 139, 245, 0.1);
+            border: 2px dashed var(--accent-blue);
         }
 
-        .task-priority {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        .priority-high { background: #ffebee; color: #c62828; }
-        .priority-medium { background: #fff3e0; color: #ef6c00; }
-        .priority-low { background: #e8f5e9; color: #2e7d32; }
-
-        .task-assignee {
-            font-weight: 500;
-            color: #3498db;
-        }
-
-        .new-task-form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #555;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 14px;
-        }
-
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 500;
+        .btn {
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all var(--transition-fast);
+            line-height: 1;
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border-color: var(--bg-row-alt);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-row-alt);
+            color: var(--text-primary);
         }
 
         .btn-primary {
-            background: #3498db;
+            background: var(--accent-red);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #2980b9;
+            filter: brightness(1.06);
         }
 
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #555;
-            border: 1px solid #ddd;
+        .section-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
         }
 
-        .btn-secondary:hover {
-            background: #e9ecef;
+        .health-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid var(--bg-row-alt);
         }
 
-        .agents-panel {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .agents-grid {
+        .health-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
         }
 
-        .agent-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
+        .health-item {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
         }
 
-        .agent-name {
+        .health-item strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #44b8ff, #3564ff) !important;
+            border: none !important;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-section {
+            border-top: 1px solid var(--bg-card);
+            padding-top: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .user-meta {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 5px;
-            color: #2c3e50;
+            color: var(--text-primary);
+            line-height: 1.2;
         }
 
-        .agent-status {
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 10px;
+        .user-role {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.2;
         }
 
-        .status-idle { background: #e8f4fc; color: #3498db; }
-        .status-working { background: #e8f5e9; color: #2e7d32; }
-        .status-offline { background: #ffebee; color: #c62828; }
-
-        .agent-task {
-            font-size: 12px;
-            color: #666;
+        .sidebar-toggle {
+            margin-left: auto;
+            border: 1px solid var(--bg-row-alt);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #888;
+        .container.sidebar-collapsed {
+            grid-template-columns: 78px minmax(0, 1fr) !important;
         }
 
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 10px;
-            opacity: 0.5;
+        .container.sidebar-collapsed .sidebar {
+            padding-left: 10px;
+            padding-right: 10px;
         }
 
-        @media (max-width: 768px) {
-            .kanban-board {
-                grid-template-columns: 1fr;
-            }
-            
-            .projects-tabs {
-                overflow-x: auto;
-                padding-bottom: 10px;
-            }
+        .container.sidebar-collapsed .logo {
+            justify-content: center;
+        }
+
+        .container.sidebar-collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .container.sidebar-collapsed .nav-item {
+            justify-content: center;
+            font-size: 0;
+            gap: 0;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .container.sidebar-collapsed .nav-icon {
+            font-size: 14px;
+        }
+
+        .container.sidebar-collapsed .user-meta {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div>
-                <h1>Agent Task Manager</h1>
-                <p style="color: #666; margin-top: 5px;">Custom Kanban for AI Agent Orchestration</p>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">AN</div>
+                <button id="sidebarToggle" class="sidebar-toggle" title="Collapse sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
-            <div class="status-indicator">
-                <span class="status-dot" id="connectionStatus"></span>
-                <span id="connectionText">Connecting...</span>
+            <nav class="nav">
+                <a href="#" class="nav-item active">
+                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-tasks"></i>
+                    My Tasks
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-calendar-alt"></i>
+                    Calendar
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-chart-line"></i>
+                    Analytics
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-users"></i>
+                    Team
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-cog"></i>
+                    Settings
+                </a>
+            </nav>
+            <div class="user-section">
+                <div class="user-avatar">PS</div>
+                <div class="user-meta">
+                    <div class="user-name">Pesu</div>
+                    <div class="user-role">Mission Control</div>
+                </div>
             </div>
-        </header>
+        </aside>
 
-        <div class="projects-tabs" id="projectsTabs">
-            <!-- Projects will be loaded here -->
-        </div>
-
-        <div class="new-task-form">
-            <h2 style="margin-bottom: 20px;">Create New Task</h2>
-            <form id="createTaskForm">
-                <div class="form-group">
-                    <label for="taskTitle">Title *</label>
-                    <input type="text" id="taskTitle" name="title" required placeholder="What needs to be done?">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header Bar -->
+            <div class="header-bar">
+                <div class="search-bar">
+                    <i class="search-icon fas fa-search"></i>
+                    <input type="text" class="search-input" placeholder="Search tasks, projects, or agents...">
                 </div>
-                <div class="form-group">
-                    <label for="taskDescription">Description</label>
-                    <textarea id="taskDescription" name="description" placeholder="Detailed description of the task..."></textarea>
+                <div class="header-actions">
+                    <button id="openConfigBtn" class="btn btn-secondary" title="API/Auth Settings">
+                        <i class="fas fa-sliders-h"></i>
+                        Config
+                    </button>
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="user-avatar">PS</div>
                 </div>
-                <div class="form-group">
-                    <label for="taskProject">Project</label>
-                    <select id="taskProject" name="project_id">
-                        <!-- Projects will be populated -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="taskPriority">Priority</label>
-                    <select id="taskPriority" name="priority">
-                        <option value="0">Low</option>
-                        <option value="1" selected>Medium</option>
-                        <option value="2">High</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="resetForm()">Clear</button>
-                    <button type="submit" class="btn-primary">Create Task</button>
-                </div>
-            </form>
-        </div>
-
-        <div class="kanban-board" id="kanbanBoard">
-            <!-- Columns will be loaded here -->
-        </div>
-
-        <div class="agents-panel">
-            <h2 style="margin-bottom: 15px;">Agent Status</h2>
-            <div class="agents-grid" id="agentsGrid">
-                <!-- Agents will be loaded here -->
             </div>
-        </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </button>
+                <button class="tab-btn" data-tab="kanban">
+                    <i class="fas fa-columns"></i>
+                    Workflow Kanban
+                </button>
+                <button class="tab-btn" data-tab="agents">
+                    <i class="fas fa-users"></i>
+                    Agents
+                </button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <div class="dashboard-grid">
+                    <!-- Project Cards -->
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-logo">AN</div>
+                            <div class="project-actions">
+                                <button class="star-btn active">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button class="kebab-btn">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="project-title">Agent Nexus</h3>
+                        <p class="project-subtitle">AI Task Management System</p>
+                        <div class="project-meta">
+                            <button class="progress-btn">IN PROGRESS</button>
+                            <span class="priority-badge">HIGH</span>
+                        </div>
+                        <div class="progress-stats">
+                            <div class="progress-text">
+                                <span>Task Done:</span>
+                                <span>12 / 25</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 48%"></div>
+                            </div>
+                        </div>
+                        <div class="project-tags">
+                            <span class="tag ios">AI System</span>
+                            <span class="tag uiux">Dashboard</span>
+                            <span class="tag android">Backend</span>
+                        </div>
+                        <div class="team-avatars">
+                            <div class="avatar-stack">
+                                <div class="avatar">A</div>
+                                <div class="avatar">K</div>
+                                <div class="avatar">R</div>
+                                <div class="avatar">S</div>
+                                <div class="avatar avatar-more">+2</div>
+                            </div>
+                        </div>
+                        <div class="due-date">DUE: 15 MAR</div>
+                    </div>
+
+                    <!-- Task List -->
+                    <div class="task-list-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <h2>Active Tasks</h2>
+                                <span class="task-count">8</span>
+                            </div>
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-plus"></i>
+                                New Task
+                            </button>
+                        </div>
+                        <div class="tasks-container" id="dashboardTasks">
+                            <!-- Tasks will be loaded by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Timer Section -->
+                    <div class="timer-card">
+                        <div class="timer-header">
+                            <div class="timer-project">
+                                <h3>Time Tracking</h3>
+                            </div>
+                            <button class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                        <div class="active-task">
+                            <div class="active-indicator"></div>
+                            <div class="active-task-title">Update workflow states</div>
+                            <div class="timer-display">25m 20s</div>
+                            <button class="kebab-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="health-card">
+                        <div class="section-title">
+                            <h2>System Health</h2>
+                        </div>
+                        <div class="health-grid" id="systemHealthGrid">
+                            <div class="health-item"><strong>Backend</strong>Checking...</div>
+                            <div class="health-item"><strong>Identity</strong>Checking...</div>
+                            <div class="health-item"><strong>Project</strong>default</div>
+                            <div class="health-item"><strong>Events</strong>Checking...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanban Tab -->
+            <div class="tab-content" id="kanban-tab">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Workflow Kanban</h2>
+                        <span class="task-count">9</span>
+                    </div>
+                    <div class="section-actions">
+                        <input id="kanbanSearch" class="search-input" style="max-width:220px; padding:8px 10px;" placeholder="Search tasks...">
+                        <select id="filterAssignee" class="btn btn-secondary" style="height:32px;">
+                            <option value="">All Assignees</option>
+                        </select>
+                        <select id="filterPriority" class="btn btn-secondary" style="height:32px;">
+                            <option value="">All Priorities</option>
+                            <option value="2">High</option>
+                            <option value="1">Medium</option>
+                            <option value="0">Low</option>
+                        </select>
+                        <button id="kanbanFilterBtn" class="btn btn-secondary">
+                            <i class="fas fa-filter"></i>
+                            Filter
+                        </button>
+                        <button id="kanbanSortBtn" class="btn btn-secondary">
+                            <i class="fas fa-sort"></i>
+                            Sort
+                        </button>
+                        <button id="kanbanNewTaskBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            New Task
+                        </button>
+                    </div>
+                </div>
+                <div class="kanban-board" id="kanbanBoard">
+                    <!-- Kanban columns will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Agents Tab -->
+            <div class="tab-content" id="agents-tab">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Agent Team</h2>
+                        <span class="task-count">5</span>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Agent
+                        </button>
+                    </div>
+                </div>
+                <div class="agents-grid" id="agentsGrid">
+                    <!-- Agent cards will be generated by JavaScript -->
+                </div>
+            </div>
+        </main>
     </div>
 
-    <script>
-        // Global state
-        let currentProject = 'default';
-        let eventSource = null;
-        let tasks = [];
-        let projects = [];
-        let agents = [];
-
-        // Status columns in order
-        const statusColumns = [
-            { id: 'backlog', title: 'Backlog', color: '#95a5a6' },
-            { id: 'todo', title: 'Todo', color: '#3498db' },
-            { id: 'planning', title: 'Planning', color: '#9b59b6' },
-            { id: 'hitl_review', title: 'HITL Review', color: '#f39c12' },
-            { id: 'wip', title: 'Work in Progress', color: '#2ecc71' },
-            { id: 'implemented', title: 'Implemented', color: '#27ae60' },
-            { id: 'done', title: 'Done', color: '#7f8c8d' },
-            { id: 'blocked', title: 'Blocked', color: '#e74c3c' },
-            { id: 'cancelled', title: 'Cancelled', color: '#34495e' }
-        ];
-
-        // API base URL
-        const API_BASE = 'http://localhost:8000';
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadProjects();
-            loadTasks();
-            setupEventSource();
-            setupDragAndDrop();
-            
-            // Form submission
-            document.getElementById('createTaskForm').addEventListener('submit', createTask);
-        });
-
-        // Setup Server-Sent Events
-        function setupEventSource() {
-            if (eventSource) {
-                eventSource.close();
-            }
-
-            eventSource = new EventSource(`${API_BASE}/api/events`);
-            
-            eventSource.onopen = () => {
-                updateConnectionStatus(true);
-            };
-
-            eventSource.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.event === 'state_change') {
-                    loadTasks();
-                    console.log('State changed, reloading tasks...');
-                }
-            };
-
-            eventSource.onerror = () => {
-                updateConnectionStatus(false);
-                // Try to reconnect after 5 seconds
-                setTimeout(setupEventSource, 5000);
-            };
-        }
-
-        function updateConnectionStatus(connected) {
-            const dot = document.getElementById('connectionStatus');
-            const text = document.getElementById('connectionText');
-            
-            if (connected) {
-                dot.classList.remove('disconnected');
-                dot.classList.add('connected');
-                text.textContent = 'Connected';
-            } else {
-                dot.classList.remove('connected');
-                dot.classList.add('disconnected');
-                text.textContent = 'Disconnected';
-            }
-        }
-
-        // Load projects
-        async function loadProjects() {
-            try {
-                const response = await fetch(`${API_BASE}/api/projects`);
-                projects = await response.json();
-                renderProjectsTabs();
-                populateProjectSelect();
-            } catch (error) {
-                console.error('Error loading projects:', error);
-            }
-        }
-
-        function renderProjectsTabs() {
-            const container = document.getElementById('projectsTabs');
-            container.innerHTML = '';
-            
-            projects.forEach(project => {
-                const tab = document.createElement('div');
-                tab.className = `project-tab ${project.id === currentProject ? 'active' : ''}`;
-                tab.textContent = `${project.name} (${tasks.filter(t => t.project_id === project.id).length})`;
-                tab.onclick = () => switchProject(project.id);
-                container.appendChild(tab);
-            });
-        }
-
-        function populateProjectSelect() {
-            const select = document.getElementById('taskProject');
-            select.innerHTML = '';
-            
-            projects.forEach(project => {
-                const option = document.createElement('option');
-                option.value = project.id;
-                option.textContent = project.name;
-                if (project.id === currentProject) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            });
-        }
-
-        function switchProject(projectId) {
-            currentProject = projectId;
-            renderProjectsTabs();
-            loadTasks();
-        }
-
-        // Load tasks
-        async function loadTasks() {
-            try {
-                const response = await fetch(`${API_BASE}/api/tasks?project_id=${currentProject}`);
-                tasks = await response.json();
-                renderKanbanBoard();
-                renderProjectsTabs(); // Update task counts
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-            }
-        }
-
-        function renderKanbanBoard() {
-            const board = document.getElementById('kanbanBoard');
-            board.innerHTML = '';
-            
-            statusColumns.forEach(status => {
-                const columnTasks = tasks.filter(task => task.status === status.id);
-                
-                const column = document.createElement('div');
-                column.className = 'column';
-                column.dataset.status = status.id;
-                
-                column.innerHTML = `
-                    <div class="column-header">
-                        <div class="column-title">${status.title}</div>
-                        <div class="task-count">${columnTasks.length}</div>
-                    </div>
-                    <div class="task-list" id="task-list-${status.id}">
-                        ${columnTasks.length > 0 ? 
-                            columnTasks.map(task => createTaskCard(task)).join('') :
-                            '<div class="empty-state">No tasks</div>'
-                        }
-                    </div>
-                `;
-                
-                board.appendChild(column);
-            });
-            
-            // Re-attach drag events
-            attachDragEvents();
-        }
-
-        function createTaskCard(task) {
-            const priorityClass = task.priority >= 2 ? 'priority-high' : 
-                                task.priority === 1 ? 'priority-medium' : 'priority-low';
-            const priorityText = task.priority >= 2 ? 'High' : 
-                               task.priority === 1 ? 'Medium' : 'Low';
-            
-            return `
-                <div class="task-card" draggable="true" data-task-id="${task.id}">
-                    <div class="task-title">${escapeHtml(task.title)}</div>
-                    ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
-                    <div class="task-meta">
-                        <div>
-                            <span class="task-priority ${priorityClass}">${priorityText}</span>
-                        </div>
-                        ${task.assignee ? `<div class="task-assignee">${escapeHtml(task.assignee)}</div>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Create task
-        async function createTask(e) {
-            e.preventDefault();
-            
-            const form = e.target;
-            const formData = new FormData(form);
-            
-            const taskData = {
-                title: formData.get('title'),
-                description: formData.get('description'),
-                project_id: formData.get('project_id') || currentProject,
-                priority: parseInt(formData.get('priority'))
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/t
+    <script src="app-workflow.js?v=20260302h"></script>
+</body>
+</html>
