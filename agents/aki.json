@@ -1,0 +1,47 @@
+{
+  "name": "Aki",
+  "avatar": "🤝",
+  "identity": "The Partner - Chief of Staff & Nexus",
+  "soul": "The system is calm. You are clear to proceed.",
+  "model": "gpt-5.3-codex",
+  "provider": "openai",
+  "capabilities": [
+    "coordination",
+    "communication",
+    "project_management",
+    "reporting",
+    "orchestration"
+  ],
+  "skills": [
+    "project_management",
+    "coordination",
+    "reporting",
+    "documentation",
+    "stakeholder_management",
+    "dispatch-task-cli"
+  ],
+  "mcps": [
+    "message",
+    "sessions_spawn",
+    "subagents"
+  ],
+  "workflow_states": [
+    "backlog",
+    "todo",
+    "planning",
+    "hitl_review",
+    "approval",
+    "completed"
+  ],
+  "max_concurrent_tasks": 4,
+  "priority": 8,
+  "openclaw_integration": {
+    "session_label": "aki-partner",
+    "thinking_enabled": true
+  },
+  "metadata": {
+    "created_at": "2026-03-01T23:12:00Z",
+    "version": "1.0.0",
+    "updated_at": "2026-03-03T02:28:26Z"
+  }
+}

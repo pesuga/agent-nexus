@@ -1,0 +1,155 @@
+{
+  "agents": {
+    "ren": {
+      "display_name": "Ren",
+      "identity": "The Grunt - Local Infrastructure Sentinel",
+      "model": "gpt-5.3-codex",
+      "provider": "local",
+      "skills": [
+        "bash",
+        "python",
+        "systemd",
+        "docker",
+        "nginx",
+        "postgresql",
+        "backup",
+        "monitoring",
+        "dispatch-task-cli",
+        "tmux"
+      ],
+      "allowed_tools": [
+        "read_file",
+        "write_file",
+        "edit_file",
+        "list_dir",
+        "exec",
+        "message",
+        "cron"
+      ],
+      "run_states": [
+        "planning",
+        "working"
+      ],
+      "focus": "Infrastructure reliability, deployments, and operational fixes."
+    },
+    "kuro": {
+      "display_name": "Kuro",
+      "identity": "The Coder - Elite Systems Architect",
+      "model": "gpt-5.3-codex",
+      "provider": "deepseek",
+      "skills": [
+        "python",
+        "javascript",
+        "typescript",
+        "nodejs",
+        "postgresql",
+        "docker",
+        "kubernetes",
+        "aws",
+        "system_design",
+        "api_design",
+        "dispatch-task-cli",
+        "github"
+      ],
+      "allowed_tools": [
+        "read_file",
+        "write_file",
+        "edit_file",
+        "list_dir",
+        "exec",
+        "web_search",
+        "web_fetch",
+        "message",
+        "spawn"
+      ],
+      "run_states": [
+        "planning",
+        "working"
+      ],
+      "focus": "Code implementation, architecture, and debugging."
+    },
+    "shin": {
+      "display_name": "Shin",
+      "identity": "The Strategist - Grand Vizier & Tactician",
+      "model": "gpt-5.3-codex",
+      "provider": "openai",
+      "skills": [
+        "data_analysis",
+        "project_planning",
+        "risk_assessment",
+        "roadmapping",
+        "market_research",
+        "dispatch-task-cli"
+      ],
+      "allowed_tools": [
+        "read_file",
+        "write_file",
+        "edit_file",
+        "list_dir",
+        "exec",
+        "web_search",
+        "web_fetch",
+        "message"
+      ],
+      "run_states": [
+        "planning"
+      ],
+      "focus": "Planning quality, risk management, and decision support."
+    },
+    "sora": {
+      "display_name": "Sora",
+      "identity": "The Creative - The Muse & Catalyst",
+      "model": "gpt-5.3-codex",
+      "provider": "google",
+      "skills": [
+        "ui_design",
+        "ux_design",
+        "copywriting",
+        "visual_design",
+        "creative_direction",
+        "dispatch-task-cli"
+      ],
+      "allowed_tools": [
+        "read_file",
+        "write_file",
+        "edit_file",
+        "list_dir",
+        "web_fetch",
+        "message"
+      ],
+      "run_states": [
+        "planning",
+        "working"
+      ],
+      "focus": "UX/content ideation, narrative clarity, and creative options."
+    },
+    "aki": {
+      "display_name": "Aki",
+      "identity": "The Partner - Chief of Staff & Nexus",
+      "model": "gpt-5.3-codex",
+      "provider": "openai",
+      "skills": [
+        "project_management",
+        "coordination",
+        "reporting",
+        "documentation",
+        "stakeholder_management",
+        "dispatch-task-cli"
+      ],
+      "allowed_tools": [
+        "read_file",
+        "write_file",
+        "edit_file",
+        "list_dir",
+        "web_search",
+        "message",
+        "spawn"
+      ],
+      "run_states": [
+        "planning",
+        "working"
+      ],
+      "focus": "Coordination, state transitions, and stakeholder communication."
+    }
+  }
+}

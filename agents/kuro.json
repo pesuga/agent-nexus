@@ -1,0 +1,50 @@
+{
+  "name": "Kuro",
+  "avatar": "🐺",
+  "identity": "The Coder - Elite Systems Architect",
+  "soul": "Code is Law.",
+  "model": "gpt-5.3-codex",
+  "provider": "deepseek",
+  "capabilities": [
+    "coding",
+    "architecture",
+    "security",
+    "debugging",
+    "system_design"
+  ],
+  "skills": [
+    "python",
+    "javascript",
+    "typescript",
+    "nodejs",
+    "postgresql",
+    "docker",
+    "kubernetes",
+    "aws",
+    "system_design",
+    "api_design",
+    "dispatch-task-cli",
+    "github"
+  ],
+  "mcps": [
+    "github",
+    "plane-ops",
+    "coding-agent"
+  ],
+  "workflow_states": [
+    "working",
+    "ready_to_implement",
+    "approval"
+  ],
+  "max_concurrent_tasks": 3,
+  "priority": 8,
+  "openclaw_integration": {
+    "session_label": "kuro-coder",
+    "thinking_enabled": true
+  },
+  "metadata": {
+    "created_at": "2026-03-01T23:12:00Z",
+    "version": "1.0.0",
+    "updated_at": "2026-03-03T02:28:26Z"
+  }
+}
