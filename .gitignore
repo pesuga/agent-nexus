@@ -74,6 +74,7 @@ temp/
 # Backup files
 *.bak
 *.backup
+*.backup-*
 
 # Documentation
 _site/
@@ -83,3 +84,9 @@ site/
 secrets.ini
 config.ini
 credentials.json
+.nanobot/
+.agent_task_manager.json
+*.log
+test-reports/
+fix-reports/
+visual-reports/
